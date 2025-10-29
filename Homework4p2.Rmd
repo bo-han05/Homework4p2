@@ -12,13 +12,46 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Homework 4p2
 
 ```{r, message = F}
-library(shiny)
-library(dplyr)
+library(tidyverse)
 library(lubridate)
-library(plotly)
 
 train = read.csv("train_dataset.csv.gz")
 test = read.csv("test_dataset.csv.gz")
-
-
 ```
+
+#### Transformation of Variables
+```{r}
+train = train %>%
+  mutate(
+    appt_time = ymd_hms(appt_time, tz="UTC"),
+    appt_date = as.Date(appt_time),
+    appt_hour = hour(appt_time),
+    appt_day = wday(appt_time, label=T, abbr=T),
+    diff_time = as.numeric(difftime(appt_date, as.Date(appt_made), units="days")))
+test = test %>%
+  mutate(
+    appt_time = ymd_hms(appt_time, tz="UTC"),
+    appt_date = as.Date(appt_time),
+    appt_hour = hour(appt_time),
+    appt_day = wday(appt_time, label=T, abbr=T),
+    diff_time = as.numeric(difftime(appt_date, as.Date(appt_made), units="days")))
+```
+
+#### Prediction Model
+```{r}
+model = glm(no_show ~ appt_day + appt_hour + diff_time,
+            data=train, family=binomial())
+summary(model)
+```
+
+#### Predict No Shows
+```{r}
+test$pred_prob = predict(model, newdata=test, type="response")
+test$pred_no_show = if_else(test$pred_prob >= 0.5, 1, 0)
+
+error = mean(test$pred_no_show != test$no_show)
+error
+```
+
+#### Deviations From Proposed Design
+
