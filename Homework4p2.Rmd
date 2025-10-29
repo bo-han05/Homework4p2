@@ -1,0 +1,24 @@
+---
+title: "Homework4p2"
+author: "Bo Han"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Homework 4p2
+
+```{r, message = F}
+library(shiny)
+library(dplyr)
+library(lubridate)
+library(plotly)
+
+train = read.csv("train_dataset.csv.gz")
+test = read.csv("test_dataset.csv.gz")
+
+
+```
