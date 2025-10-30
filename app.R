@@ -39,40 +39,37 @@ result = test %>%
 
 #### Shiny App
 ui = fluidPage(
-  titlePanel("Expected Show-Up Rates by Hour"),
+  titlePanel("Patient No-Shows in Health Clinics"),
   sidebarLayout(
     sidebarPanel(
       selectInput(
-        "day_select",
-        "Select Day(s) of the Week:",
+        "dayInput",
+        "Select Day(s) of the Week",
         choices = levels(result$appt_day),
-        selected = "Mon",
+        selected = "Sun",
         multiple = T
       ),
-      helpText("Displays expected percentage of patients who will show up per hour-long block.")
+      helpText("Shows the expected percentage of patients who will actually show up to their appointments per hour-long block.")
     ),
     mainPanel(
-      plotOutput("linePlot", hover = "plot_hover")
+      plotOutput("plot")
     )
   )
 )
 
 server = function(input, output) {
-  output$linePlot = renderPlot({
+  output$plot = renderPlot({
     weekly = result %>%
-      filter(appt_day %in% input$day_select)
-    ggplot(weekly, aes(x = appt_hour, y = exp_show_perc, color = appt_day, group = appt_day)) +
-      geom_line(linewidth = 1.2) +
-      geom_point(size = 2) +
-      scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-      scale_x_continuous(breaks = 12:23, labels = paste0(12:23, ":00")) +
-      labs(
-        x = "Hour of Day",
-        y = "Expected Show-Up Percentage",
-        title = "Expected Patient Show-Up by Hour and Day"
-      ) +
-      theme_minimal(base_size = 14) +
-      theme(legend.title = element_blank())
+      filter(appt_day %in% input$dayInput)
+    ggplot(weekly, aes(x=appt_hour, y=exp_show_perc, color=appt_day, group=appt_day)) +
+      geom_line(linewidth=1) +
+      geom_point(size=2) +
+      scale_y_continuous(labels=scales::percent_format(accuracy=1)) +
+      scale_x_continuous(breaks=12:23, labels=paste0(12:23, ":00")) +
+      labs(x="Hour", y="Expected Patient Show Percentage",
+           title="Expected Patient Show Percentage by Hour and Day") +
+      theme_minimal(base_size=12) +
+      theme(legend.title=element_blank())
   })
 }
 
